@@ -23,6 +23,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Set up Java JDK 17
         uses: actions/setup-java@v4
@@ -34,17 +35,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: buildozer-global-${{ runner.os }}-v1
+          key: buildozer-global-${{ runner.os }}-p4a-master-py312-p4a-master-py312-v2
           restore-keys: |
-            buildozer-global-${{ runner.os }}-
+            buildozer-global-${{ runner.os }}-p4a-master-py312-
 
       - name: Cache Project Buildozer Directory
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: buildozer-project-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-project-${{ runner.os }}-p4a-master-py312-p4a-master-py312-v2-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-project-${{ runner.os }}-
+            buildozer-project-${{ runner.os }}-p4a-master-py312-
 
       - name: Install System Build Dependencies
         run: |
@@ -70,14 +71,15 @@ jobs:
             libltdl-dev \
             patch
 
-      - name: Install Python Build Tools
+      - name: Install Python Build Tools & Run Unit Tests
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install cython==0.29.36 buildozer==1.5.0 requests pillow
+          python -m pip install cython==0.29.34 buildozer==1.5.0 pytest requests pillow
+          pytest tests/
 
       - name: Validate Python Syntax in jarvis/
         run: |
-          python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('jarvis/*.py')]"
+          python -m py_compile jarvis/*.py
 
       - name: Build Android Debug APK
         run: |
